@@ -4,7 +4,7 @@
 
 void setup() {
   pinMode(LED,OUTPUT);
-  digitalWrite(LED,HIGH);
+  digitalWrite(LED,LOW);
 }
 
 void loop() {
