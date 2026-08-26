@@ -18,8 +18,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Global Variables
 uint8_t t = 0; // Time variable for controlling display with a framerate
-uint8_t pX = 32; // Player x position, initial = 
-uint8_t pY = 50; // Player y position, initial =
+uint8_t pX = 32; // Player x position
+uint8_t pY = 50; // Player y position
+uint8_t eX = 32; // Enemy x position
+uint8_t eY = 8; // Enemy Y position
+uint8_t score = 0;
+uint8_t space_pressed = 0;
+uint8_t enemy_active = 0;
+uint8_t bullet_active = 0;
+uint8_t bX = 50; // Bullet x position
+uint8_t bY = 32; // Bullet y position
 
 // Button Definitions
 #define SWL 11
@@ -73,13 +81,45 @@ void loop() {
   if(digitalRead(SWL) && pX > (0 + 2)){ // 0: The edge, + 2: 2 for the border
     pX = pX - 2;
   }
-  if(digitalRead(SWM)){
-    pY = pY;
+  if(digitalRead(SWM) && space_pressed == 0){
+    score++;
+    space_pressed = 1;
+    bullet_active = 1;
+    bX = pX + 5;
+    bY = pY;
+  }
+  if(digitalRead(SWM) != 1){
+    space_pressed = 0;
   }
   if(digitalRead(SWR) && pX < (128 - 14)){ //128: The edge, -13: 12 for the sprite, 2 for the border
     pX = pX + 2;
   }
-  
+  // Handle Enemy Spawning
+
+  // Handle Enemy/Bullet Movement
+  if(t%2 == 0){
+    eY = eY + 2;
+    bY = bY - 2;
+    if (eY > 70 && eY < 230){
+      enemy_active = 0;
+    }
+    if (bY > 64 && bY < 240){
+      bullet_active = 0;
+    }
+  }
+  if(t%30 == 0){
+    Serial.println("Enemy status: "); // DEBUG
+    Serial.println(enemy_active); // DEBUG
+    Serial.println("Bullet status: "); // DEBUG
+    Serial.println(bullet_active); // DEBUG
+    if(enemy_active == 0){
+      enemy_active = 1;
+      eX = random(8,120);
+      eY = 250;
+    }
+  }
+  // Handle Collision
+
   // Handle Display
   // Start by clearing display
   display.clearDisplay();
@@ -87,7 +127,20 @@ void loop() {
   display.drawRect(0,0,128,64,SSD1306_WHITE);
   // Player
   display.drawRoundRect(pX, pY, 11,6,2, SSD1306_WHITE);
-
+  //display.drawRoundRect(pX+3,pY-2,4,4,3,SSD1306_WHITE);
+  display.drawCircle(pX+5, pY, 2, SSD1306_WHITE);
+  // Enemy
+  if(enemy_active == 1){
+    display.drawCircle(eX, eY, 4, SSD1306_WHITE);
+  }
+  // Bullet
+  if(bullet_active == 1){
+    display.drawFastVLine(bX, bY, 4, SSD1306_WHITE);
+  }
+  // Score
+  display.setCursor(4,4);
+  display.print(score);
+  // Display function
   display.display();
 
   // Framerate Control
