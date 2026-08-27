@@ -10,6 +10,7 @@
 #include <Adafruit_SSD1306.h>
 
 // OLED Definitions and Initialise
+#define BUZ 3
 #define SCREEN_WIDTH 128 // 0 - 127   -->
 #define SCREEN_HEIGHT 64 // 0 - 63     V
 #define OLED_RESET -1
@@ -59,7 +60,13 @@ void setup() {
     if(digitalRead(SWM)){
       titleScreen1();
       t = 0;
-      delay(1000);
+      delay(50);
+      tone(BUZ,700);
+      delay(100);
+      tone(BUZ,1000);
+      delay(150);
+      noTone(BUZ);
+      delay(700);
       break;
     }
     if(t == 30){
